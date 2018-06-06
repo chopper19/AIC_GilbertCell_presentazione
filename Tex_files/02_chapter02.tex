@@ -1,0 +1,1494 @@
+\section{Circuit design}
+
+\subsection{Design by hand of a down-converting Gilbert cell}
+\begin{frame} % display current subsection in subindex
+\tableofcontents[currentsubsection]
+\end{frame}
+
+\begin{frame}
+\frametitle{Design specifications}
+\begin{block}{Technology and purposes}
+Technology used is MOSIS AMI 0.6$\mu$m. Loose constraint of $\sim 1mm$ is taken for maximum gate width. This technology is old fashioned and not the best for this purpose.
+\end{block}
+
+\begin{block}{Supply voltage}
+Supply voltage is chosen $5V$ 
+\end{block}
+
+\begin{block}{Frequencies}
+Single frequency down-converting mixer with: \\ f\textsubscript{RF}=110 MHz, f\textsubscript{LO}=100 MHz, f\textsubscript{IF}=10 MHz.
+\end{block}
+\begin{block}{Conversion Gain}
+Voltage conversion gain is chosen A\textsubscript{vC}=4. All transistors are supposed saturated.
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Used parameters}
+\begin{table} [h]
+\label{tab:specs}
+\caption{}
+\centering	
+\begin{tabular}{llcc} 
+\toprule 
+Parameter & Name			& Value 	& Unit \\ 
+\midrule
+A\textsubscript{vC} & Voltage Conversion gain & 4 & \\
+V\textsubscript{DD} & Supply voltage &	5 & V		\\
+I\textsubscript{0} & Cell biasing current & 5 & mA \\
+V\textsubscript{th0} & n-MOS threshold w.o. body effect& 0.709 &V		\\ 
+K\textsubscript{n} & n-MOS physical parameter& 116 & $\mu$A/V\textsuperscript{2}\\
+I\textsubscript{dss} & Maximum channel current density & 466 & $\mu$A/$\mu$m \\
+$\phi_P$ & Fermi potential & 0.7 & V \\
+$\gamma_B$ & Body effect coefficient & 0.5 & V \\
+L\textsubscript{min} & Technology minimum length & 0.6 & $\mu$m \\
+\bottomrule 
+\end{tabular}	
+\end{table}	
+\end{frame}
+
+\begin{frame}
+\frametitle{Gilbert Cell design (by hand)}
+\begin{enumerate}
+\item Bottom-up design
+\item Level 1 model
+\item Results: affected by short channel effects. led to redesign on CAD tool, but reported as follows for the sake of completeness.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Reference schematic}
+\begin{figure}[H] 
+\centering
+\subfloat[][\emph{Bias net}]{\scalebox{0.7}{\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+\ctikzset{bipoles/capacitor/height=0.5}
+\ctikzset{bipoles/capacitor/width=0.1}
+%M2
+\draw (0,0) to[Tnmos,mirror,n=M2] (0,2);
+\draw (M2.source) node[left=3mm,above=3mm]{$M2$};
+\draw (M2.gate)[right] |- (M2.drain);
+\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
+\draw (M2.source) to[short] (0,0) node[sground]{};
+\draw (0,2) -- (-2,2) to[C=$C_{bias}$] (-2,1) node[sground]{};
+%M5
+\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
+\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
+\draw (M5.gate)[right] |- (M5.drain);
+\draw (0,4) -- (-2,4) to[C=$C_{bias}$] (-2,3) node[sground]{};
+\draw (M5.gate) to[R, l_=$R_1$] (2,2.3) to[short,-*] (2.5,2.3) node[right]{to $G_3$};
+\draw (M5.gate) to[R=$R_1$] (2,3.7) to[short,-*] (2.5,3.7) node[right]{to $G_4$};
+%R2 R4
+\draw (M5.drain) to[R=$R_2$,n=R2] (0,6.3) to[R=$R_4$] (0,7.1) to[short,-*] (0,7.5) node[above]{$V_{dd}$};
+\draw (0,5.7) to[short] (0.7,5.7) to[R,l_=$R_3$] (2,5) to[short,-*] (2.5,5) node[right]{to $G_6$,$G_9$};
+\draw (0,5.7) to[short] (0.7,5.7) to[R=$R_3$] (2,6.4) to[short,-*] (2.5,6.4) node[right]{to $G_7$,$G_8$};
+\end{circuitikz}}}
+\subfloat[][\emph{Gilbert mixer}]{\scalebox{0.7}{\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+\ctikzset{bipoles/capacitor/height=0.5}
+\ctikzset{bipoles/capacitor/width=0.1}
+%drawing MOS
+\draw (0,0) to[Tnmos,n=M1] (0,2)
+(M1.source) node[right=3mm, above=3mm]{$M1$};
+\draw (M1.gate) to[short,-*] (-1,1);
+
+\draw (0,2) to[R,l_=$R_S$] (-2,2)
+to[Tnmos,n=M3] (-2,4)
+(M3.source) node[right=3mm, above=3mm]{$M3$};
+
+\draw (0,2) to[R,l=$R_S$] (2,2)
+to[Tnmos,mirror,n=M4] (2,4)
+(M4.source) node[left=3mm, above=3mm]{$M4$};
+
+\draw (-2,4) -- (-3,4)
+to[Tnmos,n=M6] (-3,5.5)
+(M6.source) node[right=3mm, above=3mm]{$M6$};
+
+\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (-1,5.5)
+(M7.source) node[left=3mm, above=3mm]{$M7$};
+
+\draw (2,4) -- (1,4) to[Tnmos,n=M8] (1,5.5)
+(M8.source) node[right=3mm, above=3mm]{$M8$};
+
+\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (3,5.5)
+(M9.source) node[left=3mm, above=3mm]{$M9$};
+
+%drawing VLO-
+\draw (M7.gate) -- (M8.gate);
+\draw (M7.gate) -| (0,4.5);
+\draw (0,4.5) to[C=$C_{signal}$] (0,3) to[short,-*] (0,3) node[below]{$V_{LO}-$};
+
+%drawing RL and out connections
+\draw (M6.drain) -- (-3,6) to[R=$R_L$,n=RL1] (-3,7) -- (-3,7.5);
+\draw (M9.drain) --(3,6) to[R=$R_L$,n=RL2] (3,7) -- (3,7.5);
+\draw (-1,5.5) -- (3,6);
+\draw (1,5.5) -- (-3,6);
+
+%Vdd and ground
+\draw (-3,7.5) node[above=3mm,right=3cm]{$V_{dd}$} -- (3,7.5);
+\draw (M1.source) -- (0,0) node[sground]{};
+
+% VLO+-
+\draw (M6.gate) -| (-4,4.75) to[short,-*] (-4,4.75) node[left]{to $G9$};
+%-| (-4,4.7) to[short,-*] (-4,3) node[left]{to $G_9$};
+\draw (M9.gate) -| (4,4.7) to[C=$C_{signal}$] (4,3) to[short,-*] (4,3) node[below]{$V_{LO}+$};
+
+% VRF+-
+\draw (M3.gate) -| (-3,2) to[C, l_=$C_{signal}$] (-3,1) to[short,-*] (-3,0.5) node[left]{$V_{RF}+$};
+\draw (M4.gate) -| (3,2) to[C, l_=$C_{signal}$] (3,1) to[short,-*] (3,0.5) node[left]{$V_{RF}-$};
+%\draw (M4.gate) -- (3,3) to[short,-*] (3,3) node[right]{$V_{RF}-$};
+
+%Out nodes
+\draw (-3, 6) to[short,*-*] (-4, 6) node[left]{$V_{out}+$};
+\draw (3, 6) to[short,*-*] (4, 6)node[right]{$V_{out}-$};
+\end{circuitikz}}}
+\caption{Bias net and Gilbert Mixer schematic}
+\label{fig:Gilb_designHand_schem}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Current bias design}
+\begin{columns}
+\column[]{0.5\textwidth} To have good mirroring this must be satisfied:\begin{gather}
+V_{GS1} = V_{VGS2} \notag \\
+V_{DS1} = V_{DS2} \notag \\
+\left(\frac{W}{L}\right)_1 = \left(\frac{W}{L}\right)_2 \notag 
+\end{gather}
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{1}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+\ctikzset{bipoles/capacitor/height=0.5}
+\ctikzset{bipoles/capacitor/width=0.1}
+%M2
+\draw (-2,0) to[Tnmos,mirror,n=M2] (-2,1.5);
+\draw (-2,3) to[I=$I_{ref}$] (M2.drain);
+\draw (M2.source) node[sground]{};
+\draw (M2.source) node[left=3mm, above=3mm]{$M2$};
+%M1
+\draw (1,0) to[Tnmos,n=M1] (1,1.5);
+\draw (M1.source) node[sground]{};
+\draw (M1.gate) -- (M2.gate) |- (M2.drain);
+%Current short
+\draw (1,3) to[short,i>=$I_0$] (M1.drain);
+\draw (M1.source) node[right=3mm, above=3mm]{$M1$};
+\draw (1.5,0) to[open, v=$V_{DS1}$] (1.5,1.5);
+\draw (M1.source) to[open,v^=$V_{GS1}$] (M1.gate);
+\end{circuitikz}}
+\caption{Biasing current mirror}
+\label{fig:BiasCurrent2}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Current bias design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+Valu we chose to impose are:
+\begin{gather}
+I_{ref} = I_0 = 5 mA  \notag\\
+V_{od1}=V_{od2}=0.4 V  \notag\\
+L_1 = L_2 = 3 L_{mim} = 1.8 \mu m \notag
+\end{gather} 
+from which we derive...
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{1}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+\ctikzset{bipoles/capacitor/height=0.5}
+\ctikzset{bipoles/capacitor/width=0.1}
+%M2
+\draw (-2,0) to[Tnmos,mirror,n=M2] (-2,1.5);
+\draw (-2,3) to[I=$I_{ref}$] (M2.drain);
+\draw (M2.source) node[sground]{};
+\draw (M2.source) node[left=3mm, above=3mm]{$M2$};
+%M1
+\draw (1,0) to[Tnmos,n=M1] (1,1.5);
+\draw (M1.source) node[sground]{};
+\draw (M1.gate) -- (M2.gate) |- (M2.drain);
+%Current short
+\draw (1,3) to[short,i>=$I_0$] (M1.drain);
+\draw (M1.source) node[right=3mm, above=3mm]{$M1$};
+\draw (1.5,0) to[open, v=$V_{DS1}$] (1.5,1.5);
+\draw (M1.source) to[open,v^=$V_{GS1}$] (M1.gate);
+\end{circuitikz}}
+\caption{Biasing current mirror}
+\label{fig:BiasCurrent}
+\end{figure}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Current bias design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+...we derive gate width and gate bias
+\begin{gather}
+W_1 = \frac{2I_0}{K_n V_{od1}^2}L_1 = 969.8 \mu m \notag\\ 
+V_{th1}=V_{th2}=V_{th0} \notag 
+\end{gather}
+(Since there's no body effect)
+\begin{gather}
+V_{GS2}=V_{DS2}= V_{th0}+\sqrt{\frac{2I_0L_1}{K_n W_1 }} = 1.1 V \nonumber
+\end{gather}
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{1}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+\ctikzset{bipoles/capacitor/height=0.5}
+\ctikzset{bipoles/capacitor/width=0.1}
+%M2
+\draw (-2,0) to[Tnmos,mirror,n=M2] (-2,1.5);
+\draw (-2,3) to[I=$I_{ref}$] (M2.drain);
+\draw (M2.source) node[sground]{};
+\draw (M2.source) node[left=3mm, above=3mm]{$M2$};
+%M1
+\draw (1,0) to[Tnmos,n=M1] (1,1.5);
+\draw (M1.source) node[sground]{};
+\draw (M1.gate) -- (M2.gate) |- (M2.drain);
+%Current short
+\draw (1,3) to[short,i>=$I_0$] (M1.drain);
+\draw (M1.source) node[right=3mm, above=3mm]{$M1$};
+\draw (1.5,0) to[open, v=$V_{DS1}$] (1.5,1.5);
+\draw (M1.source) to[open,v^=$V_{GS1}$] (M1.gate);
+\end{circuitikz}}
+\caption{Biasing current mirror}
+\label{fig:BiasCurrent3}
+\end{figure}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Load resistance design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+I\textsubscript{0} is evenly split into M3 and M4.
+Since LO transistors are turned on only two at a time, in each LO transistor flows also half I\textsubscript{0} when on.
+In order to have enough output swing we decided to drop across the load:
+\begin{gather}
+V_{R_L} = \frac{1}{3}\cdot V_{DD} \nonumber
+\end{gather}
+
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+%I_0 and RS
+\draw (0,-1) node[sground]{};
+\draw (0,-1) to[Tnmos,n=M1] (0,0);
+\draw (M1.gate) to[short,-*] (M1.gate);
+\draw (0,0) to[short,i_<=$I_0$] (0,1);
+\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+%voltage arrows
+\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+\end{circuitikz}
+}
+\caption{Current split in LO stage}
+\label{fig:Load}
+\end{figure}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Load resistance design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+This leads to the choosing of load
+\begin{gather}
+R_L = \frac{\frac{1}{3}V_{DD}}{I_0/2} = 667\Omega \nonumber
+\end{gather}
+
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+
+\draw (-2,4) -- (-3,4)
+to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+(M6.source) node[right=3mm, above=3mm]{$M6$};
+
+\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+(M7.source) node[left=3mm, above=4mm]{$M7$};
+
+\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+(M8.source) node[right=3mm, above=3mm]{$M8$};
+
+\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+(M9.source) node[left=3mm, above=3mm]{$M9$};
+
+%drawing VLO-
+\draw (M7.gate) -- (M8.gate);
+\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+
+%Out nodes
+\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+\draw (-2,3) -- (-2,4)
+(2,3) -- (2,4);
+\draw (0,7) node[above]{$V_{DD}$};
+\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+\end{circuitikz}
+}
+\caption{Load voltage drop}
+\label{fig:Load resistors}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Gain stage design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+R\textsubscript{S} is chosen in order to increase stage linearity without provoking a too large drop.
+\begin{gather}
+R_S = 10\Omega \notag\\ 
+V_{R_S}=\frac{R_S}{I_0/2} = 25 mV \notag
+\end{gather}
+
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+%I_0 and RS
+\draw (0,-1) node[sground]{};
+\draw (0,-1) to[Tnmos,n=M1] (0,0);
+\draw (M1.gate) to[short,-*] (M1.gate)node[right=3mm, above=3mm]{$M1$};
+\draw (0,0) to[short,i_<=$I_0$] (0,1);
+\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+%voltage arrows
+\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Gain stage Rs}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Gain stage design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+Given the previous specification $A_{vC}=4$ and conversion gain expression
+\begin{gather}
+A_{vC} = \frac{V_{IF,rms}}{V_{RF,rms}} =  \frac{2}{\pi}\frac{R_L}{\frac{1}{g_{m3,4}}+R_S} \notag
+\end{gather}
+We can then evaluate transconductance and gate width (provided $L=3L_{min}=1.8\mu m$)
+\begin{gather}
+g_{m3} = \frac{\pi}{2}\frac{1}{\frac{R_L}{A_{vC}}-R_S}=10 mS \notag\\
+W_3 = g_{m3}^2\frac{2L_{3}}{K_nI_0} = 624 \mu m \notag
+\end{gather}
+
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+%I_0 and RS
+\draw (0,-1) node[sground]{};
+\draw (0,-1) to[Tnmos,n=M1] (0,0);
+\draw (M1.gate) to[short,-*] (M1.gate)node[right=3mm, above=3mm]{$M1$};
+\draw (0,0) to[short,i_<=$I_0$] (0,1);
+\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+%voltage arrows
+\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Gain stage gm}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Gain stage design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+M3 is subjected to body effect, thus:
+\begin{gather}
+V_{SB3} = V_{DS1}+V_{R_S} \notag\\
+V_{th3} = V_{th0}+\gamma_B\big(\sqrt{2\phi_P + V_{SB3}}-\sqrt{2\phi_P}\big) = 0.957 V \notag
+\end{gather}
+This leads to an higher gate-source voltage:
+\begin{gather}
+V_{od3}=\sqrt{\frac{I_0}{K_n W_3/L_3}} = 0.353 V \notag\\
+V_{GS3} = V_{th3}+V_{od3} = 1.31 V \notag
+\end{gather}
+
+\column[]{0.5\textwidth}
+\vspace{3cm}
+\begin{figure}
+\scalebox{0.6}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+%I_0 and RS
+\draw (0,-1) node[sground]{};
+\draw (0,-1) to[Tnmos,n=M1] (0,0);
+\draw (M1.gate) to[short,-*] (M1.gate)node[right=3mm, above=3mm]{$M1$};
+\draw (0,0) to[short,i_<=$I_0$] (0,1);
+\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+%voltage arrows
+\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Gain stage body}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Gain stage design}
+\begin{columns}
+\column[]{0.5\textwidth} 
+We impose to have half the supply voltage to drop on the gain and current mirror stages. From here we can find drain to source voltage of M3:
+\begin{gather}
+V_{DS3} = \frac{1}{2}V_{DD}-V_{DS1} = 1.4 V \notag
+\end{gather}
+Since this is higher than overdrive, M3 saturation is guaranteed if on. Based on this we evaluate the gate bias voltage that keeps underneath stages saturated:
+\begin{gather}
+V_{G3}=V_{GS3} +V_{R_{S}}+V_{DS1} = 2.425 V \notag
+\end{gather}
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+%I_0 and RS
+\draw (0,-1) node[sground]{};
+\draw (0,-1) to[Tnmos,n=M1] (0,0);
+\draw (M1.gate) to[short,-*] (M1.gate)node[right=3mm, above=3mm]{$M1$};
+\draw (0,0) to[short,i_<=$I_0$] (0,1);
+\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+%voltage arrows
+\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Gain stage saturation}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Mixing stage design}
+\begin{columns}
+\column[]{0.5\textwidth}
+A very small overdrive is needed to foster fast transitions on LO stage. 
+\begin{gather}
+V_{od6} = 150mV  \notag
+\end{gather}
+But small overdrives produce large gate width. To limit this, the minimum gate length was chosen for LO stage. Then we can derive gate width:
+\begin{gather}
+L_6 = L_{min}  \notag\\
+W_6= \frac{I_0 L_6}{K_n V_{od6}^2} = 1.1mm\notag
+\end{gather}
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+
+\draw (-2,4) -- (-3,4)
+to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+(M6.source) node[right=3mm, above=3mm]{$M6$};
+
+\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+(M7.source) node[left=3mm, above=4mm]{$M7$};
+
+\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+(M8.source) node[right=3mm, above=3mm]{$M8$};
+
+\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+(M9.source) node[left=3mm, above=3mm]{$M9$};
+
+%drawing VLO-
+\draw (M7.gate) -- (M8.gate);
+\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+
+%Out nodes
+\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+\draw (-2,3) -- (-2,4)
+(2,3) -- (2,4);
+\draw (0,7) node[above]{$V_{DD}$};
+\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Mixing stage stage saturation}
+\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Mixing stage design}
+\begin{columns}
+\column[]{0.5\textwidth}
+We can take into account body effect to evaluate the threshold voltage and so the gate bias for LO stage.
+\begin{gather}
+V_{SB6} = V_{DS1}+V_{R_S}+V_{DS3} = 2.525V \notag\\
+V_{th6} = 1.18V \notag\\
+V_{GS6}=1.326V \notag\\
+V_{G6} = V_{GS6}+V_{DS1}+V_{R_S}+V_{DS3} = 3.855V
+\end{gather}
+All short-channel effect that produce a more complex threshold voltage dependence are not taken into account here.
+\column[]{0.5\textwidth}
+\begin{figure}
+\scalebox{0.7}{
+\begin{circuitikz}
+\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+
+\draw (-2,4) -- (-3,4)
+to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+(M6.source) node[right=3mm, above=3mm]{$M6$};
+
+\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+(M7.source) node[left=3mm, above=4mm]{$M7$};
+
+\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+(M8.source) node[right=3mm, above=3mm]{$M8$};
+
+\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+(M9.source) node[left=3mm, above=3mm]{$M9$};
+
+%drawing VLO-
+\draw (M7.gate) -- (M8.gate);
+\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+
+%Out nodes
+\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+\draw (-2,3) -- (-2,4)
+(2,3) -- (2,4);
+\draw (0,7) node[above]{$V_{DD}$};
+\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+\end{circuitikz}
+}
+\caption{Gain stage}
+\label{fig:Mixing stage body}
+\end{figure}
+\end{columns}
+\end{frame}
+
+
+\subsection{Design by simulation}
+
+\begin{frame} % display current subsection in subindex
+\tableofcontents[currentsubsection]
+\end{frame}
+
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Introduction}
+	A new design approach, based on \textbf{simulation and characterization of each device} is required, since:
+	\begin{itemize}
+		\item Level 1 model simulation result proven to be not enough accurate to correctly describe the behaviour of the circuit (no correspondence between calculation and simulation);
+		\item Gate width suggested in literature by:
+		\begin{equation}
+			W_{opt}=\frac{1}{3\omega L C_{ox} R_{g}} \notag
+		\end{equation}
+		yield too large devices (W$\geq$1mm).
+	\end{itemize}
+\end{frame}
+
+%new frame
+\begin{frame}
+\frametitle{Gilbert cell CAD design - Step 1}
+	\begin{columns}[c]
+		\column{0.6\textwidth}
+		\begin{description}
+			\item [Step 1]: \textbf{maximize $g_{m3}$}. 
+		\end{description}
+	To do that we \textbf{impose}:
+			\begin{itemize} 
+				\item M\textsubscript{3,4} dimensions:
+					\begin{gather}
+						L_3=3 L_{min} = 1.8\mu m \notag\\
+						50 \mu m \le W_3 \le 500 \mu m \notag
+					\end{gather}
+				\item Circuit consumption: $I_0 \approx 5mA$;
+				\item Voltage drops on M\textsubscript{3,4} nodes:
+					\begin{align}
+						V_{SB3} &= V_{DS1} = V_{DS3} = 1.5 V \notag 
+					\end{align}
+				\end{itemize}
+	
+		\column{0.35\textwidth}
+		\begin{figure}[H]
+			\centering
+			\scalebox{0.5}{
+				\begin{circuitikz}
+					\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+					%I_0 and RS
+					\draw (0,-1) node[sground]{};
+					\draw (0,-1) to[Tnmos,n=M1] (0,0);
+					\draw (M1.gate) to[short,-*] (M1.gate);
+					\draw (0,0) to[short,i_<=$I_0$] (0,1);
+					\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+					\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+					\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+					\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+					\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+					\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+					%voltage arrows
+					\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+					\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+					\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+					\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+					\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+				\end{circuitikz}
+			}
+			\caption{Gain stage.}
+			\label{fig:GainStage}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+% new frame
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Step 1}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{W2_id}
+		\caption{Drain current versus gate-source voltage of the RF stage, with W\textsubscript{3} varying from 50\(\mu\)m to 500\(\mu\)m, $V_{DS3} = 1.5 V$.}
+		\label{fig:W_2_id}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Step 1}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{W2_gm}
+		\caption{Transconductance versus gate-source voltage of the RF stage, with W\textsubscript{3} varying from 50\(\mu\)m to 500\(\mu\)m, $V_{DS3} = 1.5 V$.}
+		\label{fig:W_2_gm}
+	\end{figure}
+\end{frame}
+
+%new frame
+\begin{frame}
+\frametitle{Gilbert cell CAD design - Step 1}
+\begin{columns}[c]
+	\column{0.3\textwidth}
+	We chose:
+	\begin{itemize}
+		\item $W_3=500\mu m$m
+		\item $V_{GS3}=1.5 $V
+		\item $g_{m3}=11.9$mS
+		\item $I_0/2=2.9$mA
+	\end{itemize}
+	
+	\column{0.5\textwidth}
+	\begin{figure}[H]
+		\centering
+		\scalebox{0.6}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				%I_0 and RS
+				\draw (0,-1) node[sground]{};
+				\draw (0,-1) to[Tnmos,n=M1] (0,0);
+				\draw (M1.gate) to[short,-*] (M1.gate);
+				\draw (0,0) to[short,i_<=$I_0$] (0,1);
+				\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+				\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+				\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+				\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+				\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+				\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+				%voltage arrows
+				\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+				\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+				\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+				\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+				\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+			\end{circuitikz}
+		}
+		\caption{Gain stage.}
+		\label{fig:GainStae}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+%new frame
+%new frame
+\begin{frame}
+\frametitle{Gilbert cell CAD design - Step 2}
+\begin{columns}[c]
+	\column{0.6\textwidth}
+	\begin{description}
+		\item [Step 2]: \textbf{design the current sink}. 
+	\end{description}
+	we \textbf{have}:
+	\begin{itemize} 
+		\item voltage on R\textsubscript{S}:
+		\begin{gather}
+		V_{R_S}=2.9mA\cdot 10 \Omega =29 mV \notag
+		\end{gather}
+		\item Voltages on M\textsubscript{1}
+		\begin{align}
+		V_{DS1} &=1.5 V- V_{R_S} = 1.471V\notag \\
+		 V_{GS1} &= 1.471V \notag
+		\end{align}
+	\end{itemize}
+	From simulation we get W\textsubscript{3}=373$\mu m$ to have I\textsubscript{0}=5.8mA.
+	
+	\column{0.35\textwidth}
+	\begin{figure}[H]
+		\centering
+		\scalebox{0.5}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				%I_0 and RS
+				\draw (0,-1) node[sground]{};
+				\draw (0,-1) to[Tnmos,n=M1] (0,0);
+				\draw (M1.gate) to[short,-*] (M1.gate);
+				\draw (0,0) to[short,i_<=$I_0$] (0,1);
+				\draw (0,1) to[short,-] (-0.2,1) to[R,l_=$R_S$] (-2,1) -| (-2.5,2) to[Tnmos,n=M3] (-2.5,3) to[short,-] (-2.5,3.5) to[twoport,l=$LO_{stage}$] (-2.5,4.5);
+				\draw (M3.source) node[right=3mm, above=3mm]{$M3$};
+				\draw (0,1) to[short,-] (0.2,1) to[R,l=$R_S$] (2,1) -| (2.5,2) to[Tnmos,n=M4,mirror] (2.5,3) to[short,-] (2.5,3.5) to[twoport,l=$LO_{stage}$] (2.5,4.5);
+				\draw (M4.source) node[left=3mm, above=3mm]{$M4$};
+				\draw (M3.gate) -| (-4,2.5) to[short,-*] (-4,2.5) node[below]{};
+				\draw (M4.gate) -| (4,2.5) to[short,-*] (4,2.5) node[below]{};
+				%voltage arrows
+				\draw (M1.source) to[open, v^=$V_{GS1}$] (M1.gate);
+				\draw (-1.5,-1.7) to[open, v^=$V_{SB3}$] (-2.5,1);
+				\draw (M3.source) to[open, v^=$V_{GS3}$] (M3.gate);
+				\draw (-2,1.7) to[open, v=$V_{DS3}$] (-2,3);
+				\draw (0,0.9) to[open, v^=$V_{RS}$] (-2,0.9);
+			\end{circuitikz}
+		}
+		\caption{Gain stage.}
+		\label{fig:GainStage}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Step 2}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{W1_id}
+		\caption{Drain current versus gate-source voltage of the bias transistor M1, with W=\(373\mu m\)}
+		\label{W1_id}
+	\end{figure}
+\end{frame}
+
+%new frame
+\begin{frame}
+\frametitle{Gilbert cell CAD design - Step 3}
+\begin{columns}[c]
+	\column{0.65\textwidth}
+	\begin{description}
+		\item [Step 3]: \textbf{design the mixing stage}. 
+	\end{description}
+	From \textbf{design spec} we have: 
+	\begin{align}
+	A_v \approx \frac{2}{\pi}\left( \frac{R_L}{R_S + \frac{1}{g_{m3}}}\right)=4 \nonumber
+	\end{align}
+	therefore
+	\begin{align}
+	R_L&=A_v \cdot \left( \frac{\pi}{2} \cdot\frac{1}{g_{m3}} + R_S \right)  \notag \\
+	&= 4\cdot \left( \frac{\pi}{2}\cdot\frac{1}{11.9mS} + 10\Omega \right)=577 \Omega \notag
+	\end{align}
+	\column{0.35\textwidth}
+		\begin{figure}[H]
+			\centering
+			\scalebox{0.4}{
+					\begin{circuitikz}
+					\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+					
+					\draw (-2,4) -- (-3,4)
+					to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+					(M6.source) node[right=3mm, above=3mm]{$M6$};
+					
+					\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+					(M7.source) node[left=3mm, above=4mm]{$M7$};
+					
+					\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+					(M8.source) node[right=3mm, above=3mm]{$M8$};
+					
+					\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+					(M9.source) node[left=3mm, above=3mm]{$M9$};
+					
+					%drawing VLO-
+					\draw (M7.gate) -- (M8.gate);
+					\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+					
+					%Out nodes
+					\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+					\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+					\draw (-2,3) -- (-2,4)
+					(2,3) -- (2,4);
+					\draw (0,7) node[above]{$V_{DD}$};
+					\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+					\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+					\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+				\end{circuitikz}
+			}
+			\caption{Gain stage.}
+			\label{fig:GainStage}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+%new frame
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Step 3}
+	\begin{columns}[c]
+	\column{0.65\textwidth}
+	One has:
+	\begin{align}
+	V_{SB6}&=V_{DS1}+V_{R_S}+V_{DS3} \notag\\
+	&= 1.47V+0.029V+1.5V=3V \nonumber
+	\end{align}
+	hence:
+	\begin{align}	
+	&V_{R_L}=2.9mA\cdot 577\Omega=1.673V \nonumber \\
+	&V_{DS6}=V_{dd}-V_{R_L}-V_{SB6}=327mV \nonumber
+	\end{align}
+	We need \emph{switches} slightly above threshold.
+	\column{0.35\textwidth}
+	\begin{figure}[H]
+		\centering
+		\scalebox{0.4}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				
+				\draw (-2,4) -- (-3,4)
+				to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+				(M6.source) node[right=3mm, above=3mm]{$M6$};
+				
+				\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+				(M7.source) node[left=3mm, above=4mm]{$M7$};
+				
+				\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+				(M8.source) node[right=3mm, above=3mm]{$M8$};
+				
+				\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+				(M9.source) node[left=3mm, above=3mm]{$M9$};
+				
+				%drawing VLO-
+				\draw (M7.gate) -- (M8.gate);
+				\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+				
+				%Out nodes
+				\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+				\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+				\draw (-2,3) -- (-2,4)
+				(2,3) -- (2,4);
+				\draw (0,7) node[above]{$V_{DD}$};
+				\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+				\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+				\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+			\end{circuitikz}
+		}
+		\caption{Gain stage.}
+		\label{fig:GainStage}
+	\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Gilbert cell CAD design - Step 3}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{M6_Vth}
+		\caption{Extrapolation of M6 threshold voltage from transconductance versus the \(V_{GS}\) curve. The threshold is located at \(1.27V\).}
+		\label{M6_Vth}
+	\end{figure}
+\end{frame}
+
+%new frame
+\begin{frame}
+\frametitle{Gilbert cell CAD design - Step 3}
+	\begin{columns}[c]
+	\column{0.65\textwidth}
+	From simulation we chose V\textsubscript{od6}=60mV.
+	Then:
+	\begin{align}
+		&V_{GS6}=V_{th6}+\Delta V_6=1.33V \nonumber
+	\end{align}
+	By characterizing the device:
+	\begin{align}
+		&W_6=170.3\mu m \nonumber\\
+		&L = L_{min} = 0.6\mu m \nonumber
+	\end{align} 
+	Minimum gate length: fast but noisy.
+	\column{0.35\textwidth}
+	\begin{figure}[H]
+		\centering
+		\scalebox{0.4}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				
+				\draw (-2,4) -- (-3,4)
+				to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
+				(M6.source) node[right=3mm, above=3mm]{$M6$};
+				
+				\draw (-2,4) -- (-1,4) to[Tnmos,mirror,n=M7] (M7.drain) to[R,l=$R_L$] (-1,7)
+				(M7.source) node[left=3mm, above=4mm]{$M7$};
+				
+				\draw (2,4) -- (1,4) to[Tnmos,n=M8] (M8.drain) to[R,l=$R_L$] (1,7)
+				(M8.source) node[right=3mm, above=3mm]{$M8$};
+				
+				\draw (2,4) -- (3,4) to[Tnmos,mirror,n=M9] (M9.drain) to[R,l=$R_L$] (3,7)
+				(M9.source) node[left=3mm, above=3mm]{$M9$};
+				
+				%drawing VLO-
+				\draw (M7.gate) -- (M8.gate);
+				\draw (M7.gate) -| (0,4) to[short,-*] (0,4);
+				
+				%Out nodes
+				\draw (M6.gate) -| (-5,4.65)  to[short,-*] (-5,4.65);
+				\draw (M9.gate) -| (5,4.65)  to[short,-*] (5,4.65);
+				\draw (-2,3) -- (-2,4)
+				(2,3) -- (2,4);
+				\draw (0,7) node[above]{$V_{DD}$};
+				\draw (-2,0) node[sground]{} to[open, v^=$V_{SB6}$] (M6.source) to[open, v^=$V_{GS6}$] (M6.gate);
+				\draw (-2.5,4) to[open,v=$V_{DS6}$] (-2.5,5);
+				\draw (-4,5) to[open,v^=$V_{RL}$] (-4,7);
+			\end{circuitikz}
+		}
+		\caption{Gain stage.}
+		\label{fig:GainStage}
+	\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Bias net design - M\textsubscript{5} }
+	\begin{columns}
+		\column{0.65\textwidth}
+		Now the bias net is designed. From \textbf{spec}:
+		\begin{align}                                                             V_{G1}&=1.471 V \nonumber \\  
+		V_{G3}&=3 V \nonumber \\
+		V_{G6}&=4.33 V \nonumber
+		\end{align} 
+		We chose mirroring ratio 1:1, $L_2=1.8\mu m$ (same length of M\textsubscript{1}) and \(V_{GS2}=V_{DS2}=1.471V\). To have I\textsubscript{0}=5.8mA from \textbf{simulation}:
+		\begin{align}
+			&W_2=373\mu m \notag
+		\end{align}
+		Since $V_{G5}=3V$, from \textbf{simulation}:
+		\begin{align}
+		&W_5=130.45\mu m \nonumber\\
+		&L_5=0.6\mu m \nonumber
+		\end{align}  
+		\column{0.35\textwidth}
+		\begin{figure} [H]
+			\centering
+			\scalebox{0.6}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				\ctikzset{bipoles/capacitor/height=0.5}
+				\ctikzset{bipoles/capacitor/width=0.1}
+				%M2
+				\draw (0,0) to[Tnmos,mirror,n=M2] (0,2);
+				\draw (M2.source) node[left=3mm,above=3mm]{$M2$};
+				\draw (M2.gate)[right] |- (M2.drain);
+				\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
+				\draw (M2.source) to[short] (0,0) node[sground]{};
+				\draw (0,2) -- (-2,2) to[C=$C_{2}$] (-2,1) node[sground]{};
+				%M5
+				\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
+				\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
+				\draw (M5.gate)[right] |- (M5.drain);
+				\draw (0,4) -- (-2,4) to[C=$C_{1}$] (-2,3) node[sground]{};
+				\draw (M5.gate) to[R, l_=$R_1$] (2,2.3) to[short,-*] (2.5,2.3) node[right]{to $G_3$};
+				\draw (M5.gate) to[R=$R_1$] (2,3.7) to[short,-*] (2.5,3.7) node[right]{to $G_4$};
+				%R2 R4
+				\draw (M5.drain) to[R=$R_2$,n=R2] (0,6.3) to[R=$R_4$] (0,7.1) to[short,-*] (0,7.5) node[above]{$V_{dd}$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R,l_=$R_3$] (2,5) to[short,-*] (2.5,5) node[right]{to $G_6$,$G_9$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R=$R_3$] (2,6.4) to[short,-*] (2.5,6.4) node[right]{to $G_7$,$G_8$};
+			\end{circuitikz}
+			}
+			\caption{Reference biasing network schematic}
+			\label{fig:biasNet1}
+		\end{figure}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Bias net design - R\textsubscript{2},R\textsubscript{4}}
+	\begin{columns}
+	\column{0.65\textwidth}
+	Voltage drop on R\textsubscript{2} and R\textsubscript{4}:
+	\begin{align}
+		&R_2+R_4=\frac{V_{dd}-V_{G5}}{I_0} = 344\Omega\nonumber
+	\end{align}
+	Since $V_{G6}=4.33V$:
+	\begin{align}
+		&R_2=229\Omega \nonumber\\
+		&R_4=115\Omega \nonumber
+	\end{align}	
+	The static power consumption is $P = 5.8mA \cdot 5V = 29mW$
+	\column{0.35\textwidth}
+	\begin{figure} [H]
+		\centering
+		\scalebox{0.6}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				\ctikzset{bipoles/capacitor/height=0.5}
+				\ctikzset{bipoles/capacitor/width=0.1}
+				%M2
+				\draw (0,0) to[Tnmos,mirror,n=M2] (0,2);
+				\draw (M2.source) node[left=3mm,above=3mm]{$M2$};
+				\draw (M2.gate)[right] |- (M2.drain);
+				\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
+				\draw (M2.source) to[short] (0,0) node[sground]{};
+				\draw (0,2) -- (-2,2) to[C=$C_{2}$] (-2,1) node[sground]{};
+				%M5
+				\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
+				\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
+				\draw (M5.gate)[right] |- (M5.drain);
+				\draw (0,4) -- (-2,4) to[C=$C_{1}$] (-2,3) node[sground]{};
+				\draw (M5.gate) to[R, l_=$R_1$] (2,2.3) to[short,-*] (2.5,2.3) node[right]{to $G_3$};
+				\draw (M5.gate) to[R=$R_1$] (2,3.7) to[short,-*] (2.5,3.7) node[right]{to $G_4$};
+				%R2 R4
+				\draw (M5.drain) to[R=$R_2$,n=R2] (0,6.3) to[R=$R_4$] (0,7.1) to[short,-*] (0,7.5) node[above]{$V_{dd}$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R,l_=$R_3$] (2,5) to[short,-*] (2.5,5) node[right]{to $G_6$,$G_9$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R=$R_3$] (2,6.4) to[short,-*] (2.5,6.4) node[right]{to $G_7$,$G_8$};
+			\end{circuitikz}
+		}
+		\caption{Reference biasing network schematic}
+		\label{fig:biasNet1}
+	\end{figure}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Bias net design - R\textsubscript{1,3} and C\textsubscript{1,2} }
+	\begin{columns}
+	\column{0.65\textwidth}
+	Resistors R\textsubscript{1} and R\textsubscript{3} act as AC block:
+	\begin{align}
+	&R_1=R_3=30k\Omega \nonumber
+	\end{align}
+	Equivalent resistance seen from C\textsubscript{1}:
+	\begin{align}
+		&R_{eq}\simeq R_1//R_3//R_2//R4=76.4 \Omega \nonumber
+	\end{align}
+	Pole frequency un decade before f\textsubscript{LO}:
+	\begin{align}
+		C_{1}\ge 10\cdot \frac{1}{2\pi \cdot R_{eq} \cdot \frac{f_{lo}}{10}} = 20.8pF \notag
+	\end{align}
+	From \textbf{optimization}: $C_1=C_2=25pF$.
+	\column{0.35\textwidth}
+	\begin{figure} [H]
+		\centering
+		\scalebox{0.6}{
+			\begin{circuitikz}
+				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
+				\ctikzset{bipoles/capacitor/height=0.5}
+				\ctikzset{bipoles/capacitor/width=0.1}
+				%M2
+				\draw (0,0) to[Tnmos,mirror,n=M2] (0,2);
+				\draw (M2.source) node[left=3mm,above=3mm]{$M2$};
+				\draw (M2.gate)[right] |- (M2.drain);
+				\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
+				\draw (M2.source) to[short] (0,0) node[sground]{};
+				\draw (0,2) -- (-2,2) to[C=$C_{2}$] (-2,1) node[sground]{};
+				%M5
+				\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
+				\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
+				\draw (M5.gate)[right] |- (M5.drain);
+				\draw (0,4) -- (-2,4) to[C=$C_{1}$] (-2,3) node[sground]{};
+				\draw (M5.gate) to[R, l_=$R_1$] (2,2.3) to[short,-*] (2.5,2.3) node[right]{to $G_3$};
+				\draw (M5.gate) to[R=$R_1$] (2,3.7) to[short,-*] (2.5,3.7) node[right]{to $G_4$};
+				%R2 R4
+				\draw (M5.drain) to[R=$R_2$,n=R2] (0,6.3) to[R=$R_4$] (0,7.1) to[short,-*] (0,7.5) node[above]{$V_{dd}$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R,l_=$R_3$] (2,5) to[short,-*] (2.5,5) node[right]{to $G_6$,$G_9$};
+				\draw (0,5.7) to[short] (0.7,5.7) to[R=$R_3$] (2,6.4) to[short,-*] (2.5,6.4) node[right]{to $G_7$,$G_8$};
+			\end{circuitikz}
+		}
+		\caption{Reference biasing network schematic}
+		\label{fig:biasNet1}
+	\end{figure}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design CAD validation - Full circuit}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\textwidth, angle=-90]{S_cad_full}
+		\caption{Gilbert cell and bias network schematic}
+		\label{S_cad_full}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design CAD validation - Gain stage}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{S_cad_I0}
+		\caption{Close up view on current sink and RF stage}
+		\label{S_cad_I0}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design CAD validation - Mixing stage}
+	\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.13]{S_cad_LO}
+	\caption{Close up view of LO stage\label{subfig-1:S_cad_LO}}
+	\label{S_cad_I0}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design CAD validation - Bias net }
+	\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.10]{S_cad_biasnet}
+	\caption{Close up view of LO stage\label{subfig-1:S_cad_biasnet}}
+	\label{S_cad_I0}
+	\end{figure}
+\end{frame}
+
+\subsection{Layout of the Gilbert cell}
+\begin{frame}
+	\tableofcontents[currentsubsection]
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout strategy}
+	\begin{itemize}
+		\item Common centroid, interdigitated structures: less gradients;
+		\item Multi-finger structure with same-length for transistors fingers: minimize encroachment;
+		\item Components with same alignment: uniform error distribution;
+		\item Dummy elements: less border effects;
+		\item Limited substrate noise with guard rings;
+		\item Minimum number of crossed connections and metal changes in the routing process;
+		\item Compact and symmetric structure;
+		\item Guard rings used because of circuit width and shared body contact for each MOSFET.
+		\item \textbf{Every device has been optimized} to have correspondence between circuit and layout.  
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Gain and Mixing stage}
+	\begin{columns}
+		\column{0.6\textwidth}
+		A \textbf{symmetric} input low noise differential stage is desired.
+		A common centroid structure is employed along with dummy elements (shorted drain and source).
+		
+		Same approach with mixing stage. Designed to be easily stacked above RF stage, with the two witching stages kept close to each other.
+		\column{0.4\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=0.3]{diff_CC}
+			\caption{Common centroid structure used for differential RF stage}
+			\label{fig:diff_CC}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Gain stage}
+	\begin{columns}
+		\column{0.3\textwidth}
+		M\textsubscript{3,4} parameters:
+			\begin{itemize}
+				\item m = 18(+2)
+				\item w$^*$=34.35$\mu$m
+				\item W = 618.3$\mu$m (vs 500$\mu$m)
+				\item L = 1.8$\mu$m
+				\item y = 126$\mu$m
+				\item x = 99.45$\mu$m
+			\end{itemize}
+		\column{0.7\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[scale=0.19]{L_RF_full}
+			\label{L_RF_full}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Layout - Mixing stage}
+	\begin{columns}
+	\column{0.3\textwidth}
+	M\textsubscript{6,7,8,9} parameters:
+	\begin{itemize}
+		\item m = 12(+2)
+		\item w$^*$=17.55$\mu$m
+		\item W = 210.6$\mu$m (vs 170.3$\mu$m)
+		\item L = 0.6$\mu$m
+		\item y = 56.85$\mu$m
+		\item x = 87.6$\mu$m
+	\end{itemize}
+	\column{0.7\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{L_LO_full}
+		\label{L_LO_full}
+	\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Current mirror}
+	\begin{columns}
+		\column{0.4\textwidth}
+		Current mirror shows multifinger interdigitated structure with dummy elements. M\textsubscript{1,2} parameters:
+		\begin{itemize}
+			\item m = 10(+1)
+			\item w$^*$=39.15$\mu$m
+			\item W = 391.15$\mu$m (vs 373$\mu$m)
+			\item L = 1.8$\mu$m
+			\item y = 61.5$\mu$m
+			\item x = 87.75$\mu$m
+		\end{itemize}
+		\column{0.6\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=\textwidth]{L_curmir_full}
+			\label{L_curmir_full}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - M\textsubscript{5}}
+	\begin{columns}
+		\column{0.4\textwidth}
+		M\textsubscript{5} shows multifinger interdigitated structure with dummy 	elements. M\textsubscript{5} parameters:
+		\begin{itemize}
+			\item m = 12(+2)
+			\item w$^*$=13.65$\mu$m
+			\item W = 163.8$\mu$m (vs 130.45$\mu$m)
+			\item L = 1.8$\mu$m
+			\item y = 25.2$\mu$m
+			\item x = 35.55$\mu$m
+		\end{itemize}
+		\column{0.6\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.8\textwidth]{L_M5_full}
+			\label{L_M5_full}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Layout - C\textsubscript{bias}}
+\begin{columns}
+	\column{0.6\textwidth}
+	C\textsubscript{1,2} are poly capacitors (poly1 + elec) in order to reduce dimensions and improve tolerances. Common centroid layout with n-well ring (connected to V\textsubscript{DD}) to reduce fringing field leaks along with dummy elements.
+
+	\column{0.4\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{Cap1}
+		\caption{Bias capacitors layout structure}
+		\label{Cap1}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Layout - C\textsubscript{bias}}
+\begin{columns}
+	\column{0.4\textwidth}
+	\begin{itemize}
+		\item y = 448.65$\mu$m
+		\item x = 472.5$\mu$m
+		\item C\textsubscript{bias}=25.9pF
+	\end{itemize}
+	\column{0.6\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{L_Cb_full}
+		\label{L_Cb_full}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Layout - C\textsubscript{signal}}
+\begin{columns}
+	\column{0.6\textwidth}
+	C\textsubscript{signal} are large capacitance ($\simeq$nF). Multilayer structure impossible because of \emph{CMOS design rule 11.6}. Good matching required  then common centroid structure is used. Series resistance reduced by surrounding metal plates. n-well ring connected to V\textsubscript{DD} to reduce fringing field.
+	
+	\column{0.4\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{Cap2}
+		\caption{Common centroid structure of the signal capacitors}
+		\label{Cap2}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - C\textsubscript{signal}}
+	\begin{columns}
+	\column{0.3\textwidth}
+	\begin{itemize}
+		\item y = 678.45$\mu$m
+		\item x = 480.25$\mu$m
+		\item C\textsubscript{bias}=90.1pF
+	\end{itemize}
+	\column{0.7\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.7\textwidth]{L_Cs_full}
+		\label{L_Cs_full}
+	\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Layout - R\textsubscript{1,3}}
+\begin{columns}
+	\column{0.5\textwidth}
+	R\textsubscript{1,3} are large then n-well technology necessary with common centroid structure to improve gradients (precision not necessary though). Nearby mixing stage, then guard ring needed to avoid substrate currents.
+	\column{0.5\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.15]{L_R1R3}
+		\label{L_R1R3}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Layout - R\textsubscript{2},R\textsubscript{4},R\textsubscript{L},R\textsubscript{S}}
+\begin{columns}
+	\column{0.5\textwidth}
+	R\textsubscript{2},R\textsubscript{4},R\textsubscript{L} and R\textsubscript{S} are smaller than R\textsubscript{1,3} therefore poly1 resistors can be used, improving also precision. Common centroid structure with dummy elements.
+	\column{0.5\textwidth}
+	\begin{figure}[H]
+		\centering
+		
+		\subfloat[$R_2$\label{subfig-1:L_R2}]
+		{\includegraphics[width=0.4\textwidth]{L_R2}}
+		\subfloat[$R_4$\label{subfig-1:L_R4}]
+		{\includegraphics[width=0.5\textwidth]{L_R4}}
+		\vfill
+		\subfloat[$R_L$\label{subfig-1:L_RL}]
+		{\includegraphics[width=0.6\textwidth]{L_RL}}
+		\hfil
+		\subfloat[$R_S$\label{subfig-1:L_RS}]
+		{\includegraphics[width=0.15\textwidth]{L_RS}}
+		\caption{Poly resistors layout}
+	\end{figure}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Resistors parameters}
+	\begin{table} [h]
+		\label{tab:specs}
+		\caption{Resistors parameters}
+		\centering	
+		\begin{tabular}{lccccc} 
+			\toprule 
+			Parameter & R\textsubscript{1,3}& R\textsubscript{2} & R\textsubscript{4}&R\textsubscript{L}&R\textsubscript{S} \\ 
+			\midrule
+			y [$\mu m$] &112.05&27.45&20.1&32.4&54\\
+			x [$\mu m$] &66.3&37.35&37.65&63&13.35\\
+			h [$\mu m$] &4.95&5.7&5.7&4.2&12.45\\
+			w [$\mu m$] &46.5&26.1&26.25&48.6&4.95\\
+			m			&4&2&1&1&1\\
+			R$^*$ [$\Omega$] & 7545&114.5&115.1&289.3&9.94\\
+			R\textsubscript{tot} [$\Omega$]&30180&229&115.1&289.3&9.94\\
+			\bottomrule 
+		\end{tabular}	
+	\end{table}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Full circuit}
+	Merging:
+	\begin{itemize}
+		\item Components placed to shorten interconnections, emphasize symmetries and matching to make paths equal for high frequency signals;
+		\item Body contacts placed where possible, then connected to ground, to capture free charges in the substrate (less noise).
+		\item Occupied area: $A\simeq0.7mm \cdot 1.8mm = 1.26 mm^2$;
+		\item Large amount of area occupied by capacitors.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Full circuit}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=1\textwidth]{L_complete_full}
+		\label{L_complete_full}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Layout - Full circuit without capacitors}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.18]{L_complete_zoom}
+		\label{L_complete_zoom}
+	\end{figure}
+\end{frame}
