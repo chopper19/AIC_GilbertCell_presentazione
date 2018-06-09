@@ -5,35 +5,11 @@
 \tableofcontents[currentsubsection]
 \end{frame}
 
-% new slide
-\begin{frame}
-	\frametitle{Analog multipliers working principles}
-	\begin{figure}[H]
-		\centering
-		\scalebox{0.78}
-		{
-			\begin{circuitikz} 
-				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
-				\draw
-				(0,0) node[mixer] (m) {}
-				(m.1) to[short,-] ++(-.5,0) node[left]{$x_1(t)$}
-				(m.2) to[short,-] ++(0,-.5) node[below]{$x_2(t)$}
-				(m.3) to[short,-] ++(.5,0) node[inputarrow]{} (.5,0) node[right=3mm]{$y(t)$}
-				(m.1) node[inputarrow] {} 
-				(m.2) node[inputarrow,rotate=90] {};
-			\end{circuitikz}
-		}		
-		\caption{Representation of a mixer}
-		\label{Mixer1}
-	\end{figure}
-
-	\textbf{Analog Multiplier} circuit that performs the product between two signals. Spectral components from a certain frequency band are moved to another by means of intrinsic non-linear behaviour (modulation). 
-
-\end{frame}
 
 % new slide
 \begin{frame}
 	\frametitle{Analog multipliers working principles}
+	\textbf{Analog Multiplier} circuit that performs the product between two signals. Spectral components from a certain frequency band are moved to another by means of intrinsic non-linear behaviour (modulation). The working principle is below:
 	\begin{figure}[H]
 	\centering
 	\scalebox{0.78}
@@ -49,40 +25,18 @@
 			(m.2) node[inputarrow,rotate=90] {};
 		\end{circuitikz}
 	}		
-	\caption{Working principle}
 	\label{Mixer2}	
 	\end{figure}
-
-
-	Given two signals 
-	\begin{align}
-	x_1(t) &= A_1 \cos(\omega_1 t + \varphi_1) \notag \\
-	x_2(t) &= A_2 \cos(\omega_2 t + \varphi_2) \notag
-	\end{align}
-	The output is
-	\begin{align}
-	y(t)& =x_1(t)\cdot x_2(t)   \notag 
-	\end{align}	
-	
-\end{frame}
-
-% new slide
-\begin{frame}
-	\frametitle{Analog multipliers working principles}
-	\begin{align}
-	y(t)& =x_1(t)\cdot x_2(t)   \notag \\
-	& = A_1 A_2 \cos(\omega_1 t + \varphi_1) \cos(\omega_2 t + \varphi_2) \notag \\
-	& = \frac{A_1 A_2}{2} \{\cos[(\omega_1-\omega_2) t + \varphi_1-\varphi_2]+ \cos[(\omega_1+\omega_2) t +\varphi_1+ \varphi_2]\} \notag \\
-	& = A \cos(\omega_{LF} t + \varphi_{LF}) + A \cos(\omega_{HF} t + \varphi_{HF}) \notag
-	\end{align}
-	
 	Two \textbf{new} out-of-phase spectral component at output:
 	\begin{description}
 		\item[Down-converted] at lower frequency: $\omega_{LF}= |\omega_1-\omega_2|<\omega_1,\omega_2 $
 		\item[Up-converted] at higher frequency: $\omega_{HF}= |\omega_1+\omega_2|>\omega_1,\omega_2$
 	\end{description}
 
+
+	
 \end{frame}
+
 
 % new slide
 \begin{frame}
@@ -125,41 +79,6 @@
 	
 \end{frame}
 
-
-% new slide
-\begin{frame}
-	\frametitle{Analog multipliers working principles}
-	Depending on which \textbf{devices} are employed and driving mode one has:
-	\begin{description}
-		\item[Passive mixers] switches (diodes and transistors) are used introducing \emph{conversion loss};
-		\item[Active mixers] amplifying devices are used with the possibility of \emph{conversion gain}.
-	\end{description}
-	Depending on the circuit \textbf{architecture} one has:
-	\begin{description}
-		\item[Single balanced mixers] one input component is suppressed at output, one can pass through the circuit though;
-		\item[Double balanced mixers] circuit symmetries performs the rejection of both input component at the output.
-	\end{description}
-
-\end{frame}
-
-% new slide
-\begin{frame}
-	\frametitle{nMOS-based mixer}
-	Suppose to drive a nMOSFET gate with two-tone signal, one has:
-	\begin{align}
-	v_{GS}(t) &=v_{RF}(t)+v_{LO}(t) \notag \\
-	i_D(t) &= k(v_{GS}(t)-V_{th})^2 \notag 
-	\end{align}
-		
-	having $v_{RF}<<v_{LO}$:
-	\begin{align}
-	i_D(t) &\simeq k(v_{LO}(t)-V_{th})^2+2k(v_{LO}(t)-V_{th})v_{RF}(t) \notag  \\
-	& = I_D(t)+g_m(t)v_{RF}(t) \notag
-	\end{align}
-	that is called Small Signal Large Signal Model. We have possibility of \textbf{gain}.
-
-\end{frame}
-
 % new slide
 \begin{frame}
 	\frametitle{Mixer figures of merit}
@@ -173,7 +92,7 @@
 		\begin{equation}
 			P_{IF}|_{dB_{m}} = A_{conv}|_{dB} + P_{RF}|_{dB_{m}}+30dB \notag
 		\end{equation}
-		\item \textbf{1dB compression point} due to gain saturation caused by harmonic distortion at too high input power values:
+		\item \textbf{1dB compression point} defines the input power level for which the difference between the compressed and non-compressed output power is 1dB. It is due to gain saturation caused by harmonic distortion:
 		\begin{equation}
 			P_{IF}|_{-1dB} = P_{IF}|_{dB_{m},ideal} -1dB \notag
 		\end{equation} 
@@ -192,7 +111,7 @@
 		Even order distortion gives additional DC offset, odd order distortion gives always in-band unwanted components.
 		\item \textbf{Third order intermodulation} it happens with two-tone input signals because of frequency intermodulation. Most important contribution comes from IM\textsubscript{3}: $m=\pm2,\pm1$ and $n=\pm2,\pm1$. Given $f_{RF1} = f_0$ and $f_{RF2}=f_0+\delta f$:
 		\begin{equation}
-			f_{IF,IM3}|_{m=2,n=-1} = 2f_{RF1} - f_{RF2} -f_{LO}= f_{IF} - \delta f \notag
+			f_{IF,IM3}|_{\substack{m=2\\n=-1}} = 2f_{RF1} - f_{RF2} -f_{LO}= f_{IF} - \delta f \notag
 		\end{equation} 
 	\end{itemize}
 \end{frame}
@@ -204,6 +123,19 @@
 \tableofcontents[currentsubsection]
 \end{frame}
 
+\begin{frame}
+	\frametitle{Gilbert cell overview}
+	A Gilbert-cell mixer is an active double-balanced analog multiplier. This topology provides:
+	\begin{itemize}
+		\item Reasonable conversion gain;
+		\item Good rejection of input frequency components at the output port, high linearity;
+		\item Good isolation between ports;
+		\item Integrability in CMOS technology.
+	\end{itemize}
+	We can recognise \textbf{four main blocks}: bias net, gain stage, mixing stage and load. 
+\end{frame}
+
+%new slide
 \begin{frame}
 \frametitle{Gilbert cell circuit analysis - Bias net}
 \begin{figure}[H] 
@@ -218,7 +150,7 @@
 				\draw (M2.gate)[right] |- (M2.drain);
 				\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
 				\draw (M2.source) to[short] (0,0) node[sground]{};
-				\draw (0,2) -- (-2,2) to[C=$C_{bias}$] (-2,1) node[sground]{};
+				\draw (0,6) -- (-2,6) to[C=$C_{bias}$] (-2,5) node[sground]{};
 				%M5
 				\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
 				\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
@@ -292,111 +224,11 @@
 	\caption{Full schematic}
 	\label{fig:TdomaniDFT}
 \end{figure}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{Gilbert cell overview}
-	A Gilbert-cell mixer is an active double-balanced analog multiplier. This topology provides:
-	\begin{itemize}
-		\item Reasonable conversion gain;
-		\item Good input frequency components rejection at the output port, high linearity;
-		\item Good isolation between ports;
-		\item Integrability in CMOS technology.
-	\end{itemize}
-	We can recognise \textbf{four main blocks}: bias net, gain stage, mixing stage and load. 
 \end{frame}
 
 \begin{frame}
 	\frametitle{Gilbert cell circuit analysis - Bias net}
-	The bias net includes:
-	\begin{columns}[c]
-	\column{.48\textwidth}
-		\begin{itemize}
-		\item Current mirror: M\textsubscript{1}, M\textsubscript{2};
-		\item Voltage reference generator: M\textsubscript{5}, R\textsubscript{1}, R\textsubscript{2}, R\textsubscript{3}, R\textsubscript{4} and R\textsubscript{5}.	
-	\end{itemize}
-	\begin{figure}[H]
-	\centering
-	\scalebox{0.7}{
-	\begin{circuitikz}
-		\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
-		\ctikzset{bipoles/capacitor/height=0.5}
-		\ctikzset{bipoles/capacitor/width=0.1}
-		%M2
-		\draw (-2,0) to[Tnmos,mirror,n=M2] (-2,1.5);
-		\draw (-2,3) to[I=$I_{ref}$] (M2.drain);
-		\draw (M2.source) node[sground]{};
-		\draw (M2.source) node[left=3mm, above=3mm]{$M2$};
-		%M1
-		\draw (1,0) to[Tnmos,n=M1] (1,1.5);
-		\draw (M1.source) node[sground]{};
-		\draw (M1.gate) -- (M2.gate) |- (M2.drain);
-		%Current short
-		\draw (1,3) to[short,i>=$I_0$] (M1.drain);
-		\draw (M1.source) node[right=3mm, above=3mm]{$M1$};
-		\draw (1.5,0) to[open, v=$V_{DS1}$] (1.5,1.5);
-		\draw (M1.source) to[open,v^=$V_{GS1}$] (M1.gate);
-	\end{circuitikz}
-	}
-	\caption{Current mirror}
-	\label{fig:CurrentMirror}
-	\end{figure}
-	\column{.5\textwidth}
-	\begin{figure} [H]
-		\centering
-		\scalebox{0.75}{
-			\begin{circuitikz}
-				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
-				\ctikzset{bipoles/capacitor/height=0.5}
-				\ctikzset{bipoles/capacitor/width=0.1}
-				%M2
-				\draw (0,0) to[Tnmos,mirror,n=M2] (0,2);
-				\draw (M2.source) node[left=3mm,above=3mm]{$M2$};
-				\draw (M2.gate)[right] |- (M2.drain);
-				\draw (M2.gate) to[short,-*] (2.5,1) node[right]{to $G_1$};
-				\draw (M2.source) to[short] (0,0) node[sground]{};
-				\draw (0,2) -- (-2,2) to[C=$C_{bias}$] (-2,1) node[sground]{};
-				%M5
-				\draw (M2.drain) to[Tnmos,mirror,n=M5] (0,4.5);
-				\draw (M5.source) node[left=3mm,above=3mm]{$M5$};
-				\draw (M5.gate)[right] |- (M5.drain);
-				\draw (0,4) -- (-2,4) to[C=$C_{bias}$] (-2,3) node[sground]{};
-				\draw (M5.gate) to[R, l_=$R_1$] (2,2.3) to[short,-*] (2.5,2.3) node[right]{to $G_3$};
-				\draw (M5.gate) to[R=$R_1$] (2,3.7) to[short,-*] (2.5,3.7) node[right]{to $G_4$};
-				%R2 R4
-				\draw (M5.drain) to[R=$R_2$,n=R2] (0,6.3) to[R=$R_4$] (0,7.1) to[short,-*] (0,7.5) node[above]{$V_{dd}$};
-				\draw (0,5.7) to[short] (0.7,5.7) to[R,l_=$R_3$] (2,5) to[short,-*] (2.5,5) node[right]{to $G_6$,$G_9$};
-				\draw (0,5.7) to[short] (0.7,5.7) to[R=$R_3$] (2,6.4) to[short,-*] (2.5,6.4) node[right]{to $G_7$,$G_8$};
-			\end{circuitikz}
-		}
-		\caption{Biasing network}
-		\label{fig:biasNet}
-	\end{figure}
-
-	\end{columns}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Gilbert cell circuit analysis - Bias net}
-	Current sink's transistors are in \textbf{saturation} (high output resistance, better current source), therefore $V_{GS}\geq V_{th}$ and $V_{DS}>V_{od} = V_{GS}-V_{th}$. M\textsubscript{2} is diode connected, therefore the requirement holds only for M\textsubscript{1}:
-	\begin{equation}
-	V_{DS1}\geq V_{od1}= V_{th}-\sqrt{\frac{2I_0}{\beta_{n}}} \notag
-	\end{equation}
-	In saturation, if transistors are identical:
-	\begin{gather}
-	I_0 = \frac{\beta_{n1}}{2}(V_{GS1}-V_{th})^2(1+\lambda_1V_{DS1}) \notag \\
-	I_{REF} = \frac{\beta_{n2}}{2}(V_{GS1}-V_{th})^2(1+\lambda_1V_{GS1}) \notag
-	\end{gather}
-	Hence: 
-	\begin{equation}
-	\frac{I_0}{I_{REF}} = \frac{W_1/L_1}{W_2/L_2} \notag
-	\end{equation}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Gilbert cell circuit analysis - Bias net}
-	Ideally current mirroring only dependent on \textbf{geometrical} parameters. However:
+	Ideally current mirroring only dependent on \textbf{geometrical} parameters. However, in real circuits:
 	\begin{itemize}
 		\item To have good current source long channel required, since $r_o=1/\lambda I_0\propto L$. Using short channel devices i\textsubscript{D} more dependent on $\lambda$ and tolerances;
 		\item Due to fabrication precision, MOSFET's parameters may vary:
@@ -406,30 +238,20 @@
 	\end{itemize}
 	Wide circuits, temperature gradients and small overdrive voltage significantly induce mirroring errors.
 \end{frame}
-\begin{frame}
-	\frametitle{Gilbert cell circuit analysis - Bias net}
-	\begin{itemize}
-		\item M5 is diode connected.
-		\item R2 and R4 make a resistive voltage divider used to bias the mixing stage.
-		\item R1 and R3 are used to bias net to the gain stage. They also acts as high impedance for the RF and LO signals coming from outside the circuit and prevents them to be injected into the bias net.
-		\item Capacitors C1 and C2 shunt possible non-DC disturbances coming from the Gilbert cell, improving the bias net isolation.
-	\end{itemize}
-\end{frame}
-
 
 \begin{frame}
 	\frametitle{Gilbert cell circuit analysis - Gain stage}
 	\begin{columns} [c]
 		\column{.45\textwidth}
-		The gain stage is the mixer's \textbf{linear amplifier}. It must handle the power coming from the input RF signal with low distortion, providing some amplification:
-		\begin{itemize}
-			\item M\textsubscript{3} and M\textsubscript{4} are common source degenerated differential pair affected by body effect0;
-			\item R\textsubscript{S} are degeneration resistances.	
-		\end{itemize}
-		\column{.3\textwidth}
+		Thanks to source degeneration we reduce bias dependency and  increase \textbf{linearity} (high order harmonics suppression).
+		\begin{equation}
+		\label{eq_degenGain}
+		G_{m,eq} = \frac{g_m}{1+g_m R_S} \notag
+		\end{equation}
+		\column{.5\textwidth}
 		\begin{figure}[H]
 			\centering
-			\scalebox{0.9}{
+			\scalebox{0.8}{
 			\begin{circuitikz}
 				\ctikzset{tripoles/mos style/arrows,bipoles/length=1cm}
 				%I_0 and RS
@@ -451,20 +273,6 @@
 	\end{columns}
 \end{frame}
 
-
-\begin{frame}
-	\frametitle{Gilbert cell circuit analysis - Gain stage}
-	Since this is a differential pair each transistor transconductance is given by $g_m = \sqrt{\beta_{n}I_0}$. Thanks to source degeneration we reduce bias dependency and  increase \textbf{linearity} (high order harmonics suppression). The equivalent transconductance is: 
-	\begin{equation}
-	\label{eq_degenGain}
-	G_{m,eq} = \frac{g_m}{1+g_m R_S} \notag
-	\end{equation}
-	Linearity and low noise properties are also achieved by increasing transistors' dimensions.
-	Output voltage V\textsubscript{X} could be affected by changes in parameters, affecting the whole circuit symmetry. The error voltage is given by:
-	\begin{equation}
-	V_{o,offset}= \Delta V{th}+\frac{V_{GS}-V_{th}}{2}\Bigg(-\frac{\delta R}{2R}\frac{\Delta W /L}{2W/L}\Bigg) \notag
-	\end{equation}
-\end{frame}
 
 \begin{frame}
 	\frametitle{Gilbert cell circuit analysis - Mixing stage}
@@ -515,14 +323,14 @@
 	\frametitle{Gilbert cell circuit analysis - Mixing stage}
 	Compromise in driving signal required:
 	\begin{itemize}
-		\item small amplitude of LO signals produce slower switching speed and power waste as common mode signal at the output;
-		\item too large LO signals drive the device in triode, producing spikes and unwanted feed-through reducing overall speed.
+		\item small LO signals produce slower switching speed and reduces efficiency (as common mode signal at the output);
+		\item large LO signals drive the device in triode (spikes and unwanted feed-through reducing gain).
 	\end{itemize}
 	Switching speed is related to MOSFET transition frequency:
 	\begin{equation}
 	f_T \propto  V_{od}/L \notag
 	\end{equation}
-	Then fast devices are obtained with \textbf{short channel} length and \textbf{large overdrive}. Larger devices introduce parasitic capacitance, detrimental for the conversion efficiency and speed. Maximum working frequency must be below $f_T/10$.
+	Then fast devices are obtained with \textbf{short channel} length and \textbf{large overdrive}. Larger devices introduce parasitic capacitance, detrimental for the conversion efficiency and speed. Maximum working frequency should be below $f_T/10$.
 \end{frame}
 
 \begin{frame}
@@ -541,33 +349,19 @@
 
 \begin{frame}
 	\frametitle{Gilbert cell circuit analysis - Load stage}
-	Two resistors are employed as loads. They are required to provide enough gain to the stage, active loads are not necessary since overall gain is low. They are less noisy than transistors (Flicker noise at low frequency), less reliable for what concern tolerances though.
+	Two resistors are employed as loads. They are less noisy than transistors (Flicker noise at low frequency), less reliable for what concern tolerances though. They are required to provide enough gain to the stage, if necessary active loads can be employed to maximize gain.
 \end{frame}
 
 \begin{frame}
 	\frametitle{Gilbert cell circuit analysis - Conversion gain}
-	The circuit is non-linear, therefore it is not possible to define a gain. It can be demonstrated that the \textbf{conversion gain} for the cell is:
+	The circuit is non-linear, therefore it is not possible to define a gain. It can be demonstrated that the static \textbf{conversion gain} for the cell is:
 	\begin{equation}
 	\label{eq:ConvGain}
-	A_{vC} = \frac{V_{IF,rms}}{V_{RF,rms}} =  \frac{2}{\pi}\frac{R_L}{\frac{1}{g_{m3,4}}+R_S} \notag
+	A_{vC} = \frac{V_{IF,rms}}{V_{RF,rms}} =  \frac{2}{\pi}\frac{R_L}{\frac{1}{g_{m3,4}}+R_S} \simeq \frac{2}{\pi}\frac{R_L}{R_S} \notag
 	\end{equation}
 	Some important facts hold:
 	\begin{itemize}
-		\item in first approximation the conversion gain does not depends on the amplitude of the LO signal;
+		\item in first approximation the conversion gain does not depend on the amplitude of the LO signal;
 		\item both LO and RF components are rejected at the output;
-	\end{itemize}  
-	
-\end{frame}
-
-\begin{frame}
-	\frametitle{Gilbert cell circuit analysis - Conversion gain}
-	\begin{equation}
-		\label{eq:ConvGain}
-		A_{vC} = \frac{V_{IF,rms}}{V_{RF,rms}} =  \frac{2}{\pi}\frac{R_L}{\frac{1}{g_{m3,4}}+R_S} \notag
-	\end{equation}
-	\begin{itemize}
-		\item it is possible to keep only the IF component by filter out the HF signal;
-		\item the degeneration resistance R\textsubscript{S} improve the stage's linearity. In fact, if properly chosen, one has: $A_{vC}|_{g_m3,4 \ll R_S}\simeq\frac{2}{\pi}\frac{R_L}{R_S}$. Besides to linearity, the conversion gain is less sensitive with respect to the RF stage bias point;
-		\item no informations about frequency behaviour appear with this kind of analysis.
 	\end{itemize}  
 \end{frame}

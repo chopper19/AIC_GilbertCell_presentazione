@@ -12,13 +12,12 @@
 \frametitle{Analysis}
 	Developed analysis:
 	\begin{itemize}
+		\item Bandwidth;
 		\item Time domain output mixed signal and spectral components;
 			\item Oscillator signal amplitude to maximize output component;
 		\item Conversion gain and 1dB compression point;
 		\item Single tone IIP\textsubscript{3};
-		\item Two tone IIP\textsubscript{3};
-		\item Bandwidth and CMRR of RF stage (output node filtering of output signal, current mixing);
-		\item Static power dissipation;
+		\item Two tone IIP\textsubscript{3} and CIM\textsubscript{3};
 	\end{itemize}
 	Used frequencies: f\textsubscript{LO}=110MHz, f\textsubscript{RF}=100MHz, with expected f\textsubscript{IF}=10MHz.
 \end{frame}
@@ -26,7 +25,7 @@
 \begin{frame}
 	\frametitle{Simulation setup}
 	\begin{figure}[H]
-		\centering %se si cambia posizione a questa immagine assicurarsi che sia girata con il fondo verso il bordo esterno della pagina
+		\centering
 		\includegraphics[scale=0.18, angle=-90]{setup}
 		\label{fig:setup}
 	\end{figure}
@@ -41,9 +40,8 @@
 		\label{fig:balun}
 	\end{figure}
 	\begin{itemize}
-		\item Ideal baluns simulate a  50 \(\Omega\) impedance matching condition and produce differential inputs. 
-		\item Power supply net, implicitly connected to both layout and schematic.
-		\item Mixer's loads, represented by 50\(\Omega\) resistors connected to unitary gain driven generator. Used both for ideal impedance matching purposes and to convert differential output from mixers to single-ended.
+		\item Ideal baluns simulate a  50 \(\Omega\) impedance matching condition and differential inputs. 
+		\item Mixer's loads, represented by 50\(\Omega\) resistors connected to unitary gain driven generators. Used both for ideal impedance matching purposes and to convert differential output from mixers to single-ended.
 	\end{itemize}
 \end{frame}
 
@@ -55,26 +53,24 @@
 \tableofcontents[currentsubsection]
 \end{frame}
 
+%new slide
 \begin{frame}
 	\frametitle{Bandwidth evaluation - Transition frequency}
 	Dynamic analysis is complex when dealing with non-linear circuits. The following results try to qualify the circuit in the best way.
 	Always monochromatic signals have been used. 
-\end{frame}
-
-\begin{frame}
-	\frametitle{Bandwidth evaluation - Transition frequency}
 	\begin{columns}
 	\column{0.4\textwidth}
-	Maximum working frequency must be at least one decade below MOSFET transition frequency f\textsubscript{T}.
+	Maximum working frequency $f<f_T/10$.
 	From current gain measurements on M\textsubscript{3} and M\textsubscript{6}:
 	\begin{gather}
 		f_T|_{RF}=9.43GHz \notag \\
 		f_T|_{LO}=1.12GHz \notag 
-	\end{gather}  
+	\end{gather} 
+	LO stage limits bandwidth. 
 	\column{0.6\textwidth}
 	\begin{figure}[H]
 		\centering 
-		\includegraphics[scale=0.5]{transition_freq}
+		\includegraphics[scale=0.45]{transition_freq}
 		\label{fig:ft}
 	\end{figure}
 	\end{columns}
@@ -86,7 +82,7 @@
 	\column{0.4\textwidth}
 	Bandwidth evaluated by plotting conversion gain dependency on frequency.
 	The simulation is performed keeping \(f_{LO}=f_{RF}-10\)MHz.
-	-3dB point is located almost two octaves above the maximum operation frequency.
+	-3dB point is located almost two octaves above f\textsubscript{RF}=110MHz.
 	
 	\column{0.6\textwidth}
 	\begin{figure}[H]
@@ -102,8 +98,8 @@
 	It is important to notice that we \textbf{cannot rely on this results} because:
 	\begin{itemize}
 		\item The technology kit is probably not suited for RF operation;
-		\item The layout extraction does not account for all device and circuit parasitics, that would affect the performances at high frequency. The physical implementation would  probably not work;
-		\item Pretending that results are accurate the simulation emulate the worst case operative condition. 
+		\item The layout extraction does not account for all device and circuit parasitics, that would affect the performances at high frequency and worsen The physical implementation behaviour;
+		\item Pretending accurate results, the simulation emulate the worst case condition. 
 	\end{itemize}
 \end{frame}
 
@@ -111,9 +107,9 @@
 \frametitle{Max gain vs LO}
 \begin{columns}
 	\column{0.4\textwidth}
-	LO level must be optimized to get maximum conversion gain. RF power is kept constant, sweeping pump input power.
+	LO amplitude must be optimized to get maximum conversion gain. RF power is kept constant, sweeping pump input power.
 	
-	Layout seems to have better performance than schematic in term of maximum gain. From simulation:
+	Layout seems to have better performance than schematic. From simulation:
 	\begin{align}
 	&V_{LO,opt}|_{layout}=1.23V \notag \\
 	&V_{LO,opt}|_{schematic}=2.5V \notag
@@ -129,17 +125,14 @@
 
 \begin{frame}
 \frametitle{Time domain analysis}
-\begin{columns}
-	\column{0.4\textwidth}
-	It is possible to have a qualitative analysis about the distortion introduced by the circuit (detailed treatise later), by looking at the dft of the mixer's output signal. 
-	\column{0.6\textwidth}
+
 	\begin{figure}[H]
 		\centering
-		\includegraphics[scale=0.4]{waveforms}
+		\includegraphics[scale=0.5]{waveforms}
 		\caption{Time domain waveforms: double balanced differential output with v\textsubscript{RF}=200mV,  f\textsubscript{RF}=110MHz, v\textsubscript{RF}=1.23mV, f\textsubscript{LO}=100MHz.}
 		\label{fig:TdomaniWF}
 	\end{figure}
-\end{columns}
+
 \end{frame}
 
 \begin{frame}
@@ -160,7 +153,7 @@
 	\end{figure}
 \end{frame}
 
-\subsection{Power parameters}
+\subsection{Power and distortion parameters}
 \begin{frame}
 \tableofcontents[currentsubsection]
 \end{frame}
@@ -187,33 +180,16 @@ A_{vC}|_{schematic}=2.675 \notag
 
 \begin{frame}
 \frametitle{Single tone $P_{in}$ $P_{out}$}
-\begin{columns}
-	\column{0.3\textwidth}
-	All power measurements were carried on considering 50$\Omega$ reference impedance. Single tone $P_{in}$ $P_{out}$ for layout and schematic is visible in figure.
-	\column{0.7\textwidth}
+
 	\begin{figure}[H] 
 		\centering
-		\includegraphics[width=\textwidth]{pin_pout_VRF}
-		\caption{ P\textsubscript{in}/P\textsubscript{out}}
+		\includegraphics[scale=0.6]{pin_pout_VRF}
+		\caption{Single tone $P_{in}$ $P_{out}$ for layout and schematic.}
 		\label{fig:PinPout}
 	\end{figure}
-\end{columns}
+
 \end{frame}
 
-\begin{frame}
-\frametitle{1dB compression points}
-\begin{columns}
-	\column{0.3\textwidth}
-	1dB compression point is defined as the input power for which output power decreases of 1dB with respect to non-compressed output power. A zoom-in of compression zone is visible in figure, with 1dB compression values highlighted.
-	\column{0.7\textwidth}
-	\begin{figure}[H] 
-		\centering
-		\includegraphics[width=\textwidth]{1dB_compression_1tone}
-		\caption{ P\textsubscript{1dB compression point, one-tone analysis}}
-		\label{fig:PinPout1T_1dBCp}
-	\end{figure}
-	\end{columns}
-\end{frame}
 
 \begin{frame}
 \frametitle{1dB compression points}
@@ -221,8 +197,8 @@ A_{vC}|_{schematic}=2.675 \notag
 	\column{0.4\textwidth}
 	RF power for which gains drops of 1dB are equal to 
 	\begin{gather}
-	P_{RF,in}|_{layout}=-2.304dB_{m} \notag \\
-	P_{RF,in}|_{schematic}=-4.815dB_{m} \notag
+	P_{RF,in}|_{layout}=-2.3dB_{m} \notag \\
+	P_{RF,in}|_{schematic}=-4.8dB_{m} \notag
 	\end{gather}
 	then, respectively for schematic and layout, the corresponding voltages:
 	\begin{gather}
@@ -242,7 +218,7 @@ A_{vC}|_{schematic}=2.675 \notag
 
 \begin{frame}
 \frametitle{Single tone $3^{rd}$ and $5^{th}$ order distortion}
-	Increasing input power, powers of IF's $3^{rd}$ and $5^{th}$ harmonics were measured. These are in fact the first important contributions of output non-linearity. As expected from theory non-linear terms increase with the $3^{rd}$ and $5^{th}$ power of input power.
+	Increasing input power, powers of IF's $3^{rd}$ and $5^{th}$ harmonics were measured (most important contributions of output non-linearity at 30MHz and 50MHz). As expected from theory non-linear terms increase with the $3^{rd}$ and $5^{th}$ power of input power.
 	\begin{figure}[H] 
 		\centering
 		\subfloat[][\emph{Harmonics power for schematic}]{\includegraphics[width=0.5\textwidth,trim=12mm 0mm 0mm 0mm]{IIP3_schem_1tone}}
@@ -254,7 +230,7 @@ A_{vC}|_{schematic}=2.675 \notag
 
 \begin{frame}
 \frametitle{Input and Output Intercept points}
-The amount of distortion introduced can be expressed measuring the intercept points among the linear regressions of power on fundamental and the ones on harmonics. Coordinates and ordinates are called input and output intercept points (IIP3,IIP5 and OIP3,OIP5 respectively).
+The amount of distortion is evaluated through the intercept points among the linear regressions of power on fundamental and the ones on harmonics. Coordinates and ordinates are called input and output intercept points (IIP3,IIP5 and OIP3,OIP5).
 \begin{figure}[H] 
 	\centering
 	\subfloat[][\emph{Harmonics power for schematic}]{\includegraphics[width=0.5\textwidth,trim=12mm 0mm 0mm 0mm]{IIP3_schem_1tone}}
@@ -300,7 +276,7 @@ The amount of distortion introduced can be expressed measuring the intercept poi
 \frametitle{Two tone analysis}
 \begin{columns}
 	\column{0.45\textwidth}
-	In order to simulate a non monochrome, fixed bandwidth signal a two tone analysis was carried on. The two tones are at 110MHz and 111MHz. In-band third order intermodulation products result to be at 9MHz and 12MHz. Graphs show that power related to fundamental is strongly reduced when two tones are injected, since power is spread among all intermodulation products.
+	 Two tones are injected at 110MHz and 111MHz. In-band IIP\textsubscript{3} result to be at 9MHz and 12MHz. Graphs show that power related to fundamental is strongly reduced when two tones are injected, since power is spread among all intermodulation products.
 	\column{0.4\textwidth}
 	\begin{figure}[H] 
 		\centering
