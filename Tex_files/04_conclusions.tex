@@ -1,0 +1,26 @@
+\section{Conclusions}
+\begin{frame}
+\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusions}
+Good news:
+\begin{itemize}
+	\item The circuit correctly mixes;
+	\item Reasonable conversion gain (A\textsubscript{v,layout} $\simeq$ 2.9, A\textsubscript{v,schem} $\simeq$ 2.7) with good matching between simulations and hand calculations;
+	\item Acceptable amount of distortion if the input power remains well below the 1dB compression point ($\simeq$100mV);
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusions}
+Bad news:
+\begin{itemize}
+	\item The AMI's 0.6 by MOSIS is old-fashioned, not meant for RF applications;
+	\item The extractor used to generate the layout (Cadence Diva) was not able to provide the full set of parasitic elements, leading to inaccurate analysis;
+	\item Wide circuit area necessary to fulfil the specifications (gain, power consumption), this produces a large amount of parasitic elements.  
+\end{itemize}
+To sum up, the circuit functions properly, although it probably \textbf{overestimates} what would be the real behaviour. 
+
+\end{frame}
