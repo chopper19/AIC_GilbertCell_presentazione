@@ -1124,8 +1124,9 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 		\column{0.6\textwidth}
 		\begin{itemize}
 		\item A \textbf{symmetric} input low noise differential stage is desired.
-		\item A common centroid structure is employed along with dummy elements (shorted drain and source).
-		\item Same approach with mixing stage: designed to be easily stacked above RF stage, with the two witching stages kept close to each other.
+		\item A common centroid structure is employed. This minimizes \textbf{offset} voltage.
+		\item Dummy elements to reduce \textbf{lateral diffusion} variations.
+		\item Same approach with mixing stage: designed to be easily stacked above RF stage, with the two switching stages kept close to each other.
 		\end{itemize}
 		\column{0.4\textwidth}
 		\begin{figure}[H]
@@ -1159,7 +1160,6 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 	\end{columns}
 \end{frame}
 
-
 \begin{frame}
 \frametitle{Layout - Mixing stage}
 	\begin{columns}
@@ -1186,7 +1186,7 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 	\frametitle{Layout - Current mirror}
 	\begin{columns}
 		\column{0.4\textwidth}
-		Current mirror shows multifinger interdigitated structure with dummy elements. M\textsubscript{1,2} parameters:
+		M\textsubscript{1,2} parameters:
 		\begin{itemize}
 			\item m = 10(+1)
 			\item w$^*$=39.15$\mu$m
@@ -1202,6 +1202,17 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 			\label{L_curmir_full}
 		\end{figure}
 	\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Layout - Current mirror}
+	\begin{itemize}
+		\item Current mirror shows multi-finger interdigitated structure:\\ \textbf{junction cap} approximately halved due to sharing of drain contacts.
+		\item Same alignment and dummy elements reduce gradients and \textbf{diffusion differences}.
+		\item Modular unitary width: Current ration independent on \textbf{$W_{enc}$}.
+		\item Multiple contacts to reduce series resistance.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -1231,8 +1242,9 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 \begin{columns}
 	\column{0.6\textwidth}
 	\begin{itemize}
-		\item C\textsubscript{1,2} are poly capacitors (poly1 + elec) in order to reduce dimensions and improve tolerances. 
-		\item Common centroid layout inside n-well (connected to V\textsubscript{DD}) to reduce fringing field leaks along with dummy elements.
+		\item C\textsubscript{1,2} are poly capacitors (poly1 + elec) with dummy elements in order to reduce dimensions(\textbf{G\textsubscript{ox}}) and improve tolerances. 
+		\item Common centroid layout inside n-well (connected to V\textsubscript{DD}) to reduce \textbf{fringing} field leaks along with dummy elements.
+		\item \textbf{Square units}: minimize random errors, same undercut keeps constant ratios.
 	\end{itemize}
 	\column{0.4\textwidth}
 	\begin{figure}[H]
@@ -1253,6 +1265,7 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 		\item x = 472.5$\mu$m
 		\item C\textsubscript{bias}=25.9pF
 	\end{itemize}
+	
 	\column{0.6\textwidth}
 	\begin{figure}[H]
 		\centering
@@ -1267,7 +1280,14 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 \begin{columns}
 	\column{0.6\textwidth}
 	\begin{itemize}
-	\item C\textsubscript{signal} are large capacitances ($\simeq$nF). \item Multilayer structure impossible because of \emph{CMOS design rule 11.6}. \item Good matching required  then common centroid structure is used. \item Series resistance reduced by surrounding metal plates. \item N-well ring connected to V\textsubscript{DD} to reduce fringing field.
+	\item C\textsubscript{signal} are large capacitances ($\simeq$nF).
+	\item Multilayer structure impossible because of \emph{CMOS design rule 11.6}.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\textwidth]{Multicap}
+		\label{Cap3}
+	\end{figure}
+	\item Good matching required  then common centroid structure is used. \item Series resistance reduced by surrounding metal plates. \item N-well ring connected to V\textsubscript{DD} to reduce fringing field.
 	\end{itemize}
 	\column{0.4\textwidth}
 	\begin{figure}[H]
@@ -1368,10 +1388,12 @@ to[Tnmos,n=M6] (M6.drain) to[R,l=$R_L$] (-3,7) -- (3,7)
 	\frametitle{Layout - Full circuit}
 	Merging:
 	\begin{itemize}
-		\item Components placed to shorten interconnections, emphasize symmetries and matching to make paths equal for high frequency signals;
-		\item Body contacts placed where possible, then connected to ground, to capture free charges in the substrate (less noise).
+		\item Components placed to shorten interconnections, avoid crosstalk, emphasize symmetries to make paths equal for high frequency signals;
+		\item Metal width dimension and number of vias to avoid electromigration.
+		\item As many sub contacts as possible, connected to ground, to capture free charges in the substrate (less noise).
 		\item Occupied area: $A\simeq0.7mm \cdot 1.8mm = 1.26 mm^2$;
 		\item Large amount of area occupied by capacitors.
+		\item Entire metal plates for V\textsubscript{DD} and GND could not be used (too few).
 	\end{itemize}
 \end{frame}
 
